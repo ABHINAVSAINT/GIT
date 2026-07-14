@@ -1,9 +1,10 @@
 import { getDatabase } from '../database';
 import type { Transaction } from '@finance/engine';
+import type { DB } from '../database';
 
 export async function getAllTransactions(limit = 100): Promise<Transaction[]> {
   const db = await getDatabase();
-  const rows = db.getAll<any>(
+  const rows = db.getAll<Record<string, unknown>>(
     `SELECT * FROM transactions WHERE is_deleted = 0 ORDER BY date DESC LIMIT ?`,
     [limit]
   );
@@ -12,7 +13,7 @@ export async function getAllTransactions(limit = 100): Promise<Transaction[]> {
 
 export async function getTransactionsByAccount(accountId: string): Promise<Transaction[]> {
   const db = await getDatabase();
-  const rows = db.getAll<any>(
+  const rows = db.getAll<Record<string, unknown>>(
     `SELECT * FROM transactions WHERE account_id = ? AND is_deleted = 0 ORDER BY date DESC`,
     [accountId]
   );
@@ -21,7 +22,7 @@ export async function getTransactionsByAccount(accountId: string): Promise<Trans
 
 export async function getTransactionsByDateRange(startDate: string, endDate: string): Promise<Transaction[]> {
   const db = await getDatabase();
-  const rows = db.getAll<any>(
+  const rows = db.getAll<Record<string, unknown>>(
     `SELECT * FROM transactions WHERE date >= ? AND date <= ? AND is_deleted = 0 ORDER BY date DESC`,
     [startDate, endDate]
   );
@@ -29,7 +30,7 @@ export async function getTransactionsByDateRange(startDate: string, endDate: str
 }
 
 // Insert raw SQL - exported for use by transactionService to avoid duplication
-export function insertTransactionRaw(db: any, tx: Transaction): void {
+export function insertTransactionRaw(db: DB, tx: Transaction): void {
   db.execute(
     `INSERT INTO transactions (id, account_id, counterpart_account_id, amount, currency, type, date,
       posted_date, category_id, subcategory_id, tags, merchant, description, notes,
@@ -116,40 +117,40 @@ export async function getMonthlyCashflow(year: number, month: number): Promise<{
   };
 }
 
-function mapRow(row: any): Transaction {
+function mapRow(row: Record<string, unknown>): Transaction {
   return {
-    id: row.id,
-    accountId: row.account_id,
-    counterpartAccountId: row.counterpart_account_id ?? undefined,
-    amount: row.amount,
-    currency: row.currency,
-    type: row.type,
-    date: row.date,
-    postedDate: row.posted_date ?? undefined,
-    categoryId: row.category_id,
-    subcategoryId: row.subcategory_id ?? undefined,
-    tags: row.tags ? JSON.parse(row.tags) : [],
-    merchant: row.merchant ?? undefined,
-    description: row.description,
-    notes: row.notes ?? undefined,
-    receiptImageUri: row.receipt_image_uri ?? undefined,
-    recurringRuleId: row.recurring_rule_id ?? undefined,
-    investmentId: row.investment_id ?? undefined,
-    units: row.units ?? undefined,
-    navOrPrice: row.nav_or_price ?? undefined,
-    status: row.status,
-    isRecurring: row.is_recurring === 1,
-    isTaxRelevant: row.is_tax_relevant === 1,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    version: row.version,
-    cashbackPaise: row.cashback_paise ?? undefined,
-    cashbackProgram: row.cashback_program ?? undefined,
-    cashbackDescription: row.cashback_description ?? undefined,
-    emiTenure: row.emi_tenure ?? undefined,
-    emiNumber: row.emi_number ?? undefined,
-    fdRate: row.fd_rate ?? undefined,
-    fdMaturityDate: row.fd_maturity_date ?? undefined,
-    interestRate: row.interest_rate ?? undefined,
+    id: row.id as string,
+    accountId: row.account_id as string,
+    counterpartAccountId: row.counterpart_account_id ? (row.counterpart_account_id as string) : undefined,
+    amount: row.amount as number,
+    currency: row.currency as string,
+    type: row.type as Transaction['type'],
+    date: row.date as string,
+    postedDate: row.posted_date ? (row.posted_date as string) : undefined,
+    categoryId: row.category_id as string,
+    subcategoryId: row.subcategory_id ? (row.subcategory_id as string) : undefined,
+    tags: row.tags ? JSON.parse(row.tags as string) : [],
+    merchant: row.merchant ? (row.merchant as string) : undefined,
+    description: row.description as string,
+    notes: row.notes ? (row.notes as string) : undefined,
+    receiptImageUri: row.receipt_image_uri ? (row.receipt_image_uri as string) : undefined,
+    recurringRuleId: row.recurring_rule_id ? (row.recurring_rule_id as string) : undefined,
+    investmentId: row.investment_id ? (row.investment_id as string) : undefined,
+    units: row.units ? (row.units as number) : undefined,
+    navOrPrice: row.nav_or_price ? (row.nav_or_price as number) : undefined,
+    status: row.status as Transaction['status'],
+    isRecurring: (row.is_recurring as number) === 1,
+    isTaxRelevant: (row.is_tax_relevant as number) === 1,
+    createdAt: row.created_at ? (row.created_at as string) : undefined,
+    updatedAt: row.updated_at ? (row.updated_at as string) : undefined,
+    version: row.version as number,
+    cashbackPaise: row.cashback_paise ? (row.cashback_paise as number) : undefined,
+    cashbackProgram: row.cashback_program ? (row.cashback_program as string) : undefined,
+    cashbackDescription: row.cashback_description ? (row.cashback_description as string) : undefined,
+    emiTenure: row.emi_tenure ? (row.emi_tenure as number) : undefined,
+    emiNumber: row.emi_number ? (row.emi_number as number) : undefined,
+    fdRate: row.fd_rate ? (row.fd_rate as number) : undefined,
+    fdMaturityDate: row.fd_maturity_date ? (row.fd_maturity_date as string) : undefined,
+    interestRate: row.interest_rate ? (row.interest_rate as number) : undefined,
   };
 }

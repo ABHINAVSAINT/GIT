@@ -3,7 +3,7 @@ import type { Category } from '@finance/engine';
 
 export async function getAllCategories(): Promise<Category[]> {
   const db = await getDatabase();
-  const rows = db.getAll<any>(
+  const rows = db.getAll<Record<string, unknown>>(
     'SELECT * FROM categories ORDER BY sort_order'
   );
   return rows.map(mapRow);
@@ -11,7 +11,7 @@ export async function getAllCategories(): Promise<Category[]> {
 
 export async function getCategoriesByType(type: string): Promise<Category[]> {
   const db = await getDatabase();
-  const rows = db.getAll<any>(
+  const rows = db.getAll<Record<string, unknown>>(
     'SELECT * FROM categories WHERE type = ? ORDER BY sort_order',
     [type]
   );
@@ -31,17 +31,17 @@ export async function insertCategory(cat: Category): Promise<void> {
   );
 }
 
-function mapRow(row: any): Category {
+function mapRow(row: Record<string, unknown>): Category {
   return {
-    id: row.id,
-    name: row.name,
-    parentId: row.parent_id ?? undefined,
-    type: row.type,
-    icon: row.icon,
-    color: row.color,
-    isSystem: row.is_system === 1,
-    sortOrder: row.sort_order,
-    budgetAmount: row.budget_amount ?? undefined,
-    budgetPeriod: row.budget_period ?? undefined,
+    id: row.id as string,
+    name: row.name as string,
+    parentId: row.parent_id ? (row.parent_id as string) : undefined,
+    type: row.type as 'income' | 'expense' | 'transfer' | 'investment',
+    icon: row.icon as string,
+    color: row.color as string,
+    isSystem: (row.is_system as number) === 1,
+    sortOrder: row.sort_order as number,
+    budgetAmount: row.budget_amount ? (row.budget_amount as number) : undefined,
+    budgetPeriod: row.budget_period ? (row.budget_period as 'monthly' | 'quarterly' | 'yearly') : undefined,
   };
 }

@@ -1,5 +1,6 @@
 import { getDatabase } from '../storage/database';
 import type { Transaction } from '@finance/engine';
+import type { DB } from '../storage/database';
 import { insertTransactionRaw } from '../storage/repositories/transactionRepository';
 
 /**
@@ -8,7 +9,7 @@ import { insertTransactionRaw } from '../storage/repositories/transactionReposit
  * All operations use db.transaction() for data integrity.
  */
 
-function updateBalanceRaw(db: any, accountId: string, deltaPaise: number): void {
+function updateBalanceRaw(db: DB, accountId: string, deltaPaise: number): void {
   const today = new Date().toISOString().slice(0, 10);
   db.execute(
     `UPDATE accounts SET balance = balance + ?, balance_as_of = ? WHERE id = ?`,
