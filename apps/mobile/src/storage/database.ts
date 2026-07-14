@@ -300,11 +300,21 @@ const migrations: Array<{ version: number; name: string; up: string }> = [
   ` },
 ];
 
+/**
+ * Check if a column exists in a table.
+ * Note: Uses string interpolation for table/column names as these values are controlled
+ * by the migration system (not user input). For user-provided identifiers, use
+ * identifier quoting or whitelist validation.
+ */
 function columnExists(database: DB, table: string, column: string): boolean {
   const cols = database.getAll<{ name: string }>(`PRAGMA table_info(${table})`);
   return cols.some(c => c.name === column);
 }
 
+/**
+ * Add a column to a table if it doesn't exist.
+ * Note: Uses string interpolation for identifiers. All inputs are controlled by migrations.
+ */
 function addColumnIfMissing(database: DB, table: string, column: string, type: string): void {
   if (!columnExists(database, table, column)) {
     database.execute(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`);

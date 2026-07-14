@@ -96,6 +96,12 @@ function parseCSV(text: string): { headers: string[]; rows: string[][] } {
   return { headers, rows };
 }
 
+/**
+ * Embedded demo CSV data for sample account onboarding.
+ * This allows users to see sample transactions immediately without uploading files.
+ * In production, users would upload their actual bank/export CSV files.
+ * The data covers multiple account types: savings, credit cards, EMI cards, and investments.
+ */
 // Embedded CSV data
 const ADHOC_CSV = `Date,Day,Amount (₹),Spent (₹)
 9 Nov 2025,Sunday,,0

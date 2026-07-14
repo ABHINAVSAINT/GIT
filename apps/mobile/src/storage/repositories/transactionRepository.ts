@@ -28,8 +28,8 @@ export async function getTransactionsByDateRange(startDate: string, endDate: str
   return rows.map(mapRow);
 }
 
-export async function insertTransaction(tx: Transaction): Promise<void> {
-  const db = await getDatabase();
+// Insert raw SQL - exported for use by transactionService to avoid duplication
+export function insertTransactionRaw(db: any, tx: Transaction): void {
   db.execute(
     `INSERT INTO transactions (id, account_id, counterpart_account_id, amount, currency, type, date,
       posted_date, category_id, subcategory_id, tags, merchant, description, notes,
@@ -52,6 +52,11 @@ export async function insertTransaction(tx: Transaction): Promise<void> {
       tx.interestRate ?? null,
     ]
   );
+}
+
+export async function insertTransaction(tx: Transaction): Promise<void> {
+  const db = await getDatabase();
+  insertTransactionRaw(db, tx);
 }
 
 export async function insertTransactionAndBalance(
@@ -77,31 +82,6 @@ export async function insertLinkedTransactions(primary: Transaction, counterpart
     insertTransactionRaw(db, primary);
     insertTransactionRaw(db, counterpart);
   });
-}
-
-function insertTransactionRaw(db: any, tx: Transaction): void {
-  db.execute(
-    `INSERT INTO transactions (id, account_id, counterpart_account_id, amount, currency, type, date,
-      posted_date, category_id, subcategory_id, tags, merchant, description, notes,
-      receipt_image_uri, recurring_rule_id, investment_id, units, nav_or_price,
-      status, is_recurring, is_tax_relevant, is_deleted, version,
-      cashback_paise, cashback_program, cashback_description,
-      emi_tenure, emi_number, fd_rate, fd_maturity_date, interest_rate)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 1, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      tx.id, tx.accountId, tx.counterpartAccountId ?? null,
-      tx.amount, tx.currency, tx.type, tx.date,
-      tx.postedDate ?? null, tx.categoryId, tx.subcategoryId ?? null,
-      JSON.stringify(tx.tags ?? []), tx.merchant ?? null,
-      tx.description, tx.notes ?? null,
-      tx.receiptImageUri ?? null, tx.recurringRuleId ?? null,
-      tx.investmentId ?? null, tx.units ?? null, tx.navOrPrice ?? null,
-      tx.status, tx.isRecurring ? 1 : 0, tx.isTaxRelevant ? 1 : 0,
-      tx.cashbackPaise ?? null, tx.cashbackProgram ?? null, tx.cashbackDescription ?? null,
-      tx.emiTenure ?? null, tx.emiNumber ?? null, tx.fdRate ?? null, tx.fdMaturityDate ?? null,
-      tx.interestRate ?? null,
-    ]
-  );
 }
 
 export async function deleteTransaction(id: string): Promise<void> {
