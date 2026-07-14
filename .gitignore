@@ -1,0 +1,78 @@
+# Dependencies
+node_modules/
+
+# Monorepo symlinks (junctions)
+apps/*/node_modules/react-native
+
+# Build output
+dist/
+dist_bundle/
+expo/
+*.tsbuildinfo
+
+# Native build artifacts (source under android/ should be committed)
+**/android/.gradle/
+**/android/app/build/
+**/android/build/
+**/android/app/.cxx/
+**/android/local.properties
+**/ios/Pods/
+**/ios/build/
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+metro_direct.log
+metro.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug artifacts
+ui*.xml
+*.apk
+*.idsig
+apk_extracted/
+archive/
+.kilo/
+*.hprof
+
+# Screenshots (dev only)
+screenshot*.png
+ss_*.png
+
+# TypeScript build artifacts (Metro resolves .js from .ts)
+*.d.ts
+*.d.ts.map
+*.js.map
+
+# Compiled .js in source directories (tsc output)
+packages/engine/src/*.js
+packages/engine/src/__tests__/*.js
+apps/mobile/src/**/*.js
+
+# Coverage
+coverage/
+
+# Sensitive / personal data (DO NOT COMMIT)
+*.keystore
+*.jks
+CSV files/
+apps/mobile/CSV files/
+CC_MITC.txt
+CC_MITC.pdf
+axis-tnc.txt
+*.pdf
+terms-and-conditions-*.pdf
+
+# Session docs (local only)
+SESSION_NOTES.md
+session.md
+
+# IDE
+.idea/
+.vscode/

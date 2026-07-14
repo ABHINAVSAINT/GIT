@@ -1,0 +1,20 @@
+{
+  "name": "finance-tracker",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .ts,.tsx",
+    "clean": "turbo clean",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "turbo": "^2.2.0",
+    "typescript": "^5.5.0",
+    "prettier": "^3.3.0"
+  },
+  "packageManager": "npm@10.8.0"
+}

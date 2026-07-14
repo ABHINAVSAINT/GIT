@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "FinTrack",
+    "slug": "fintrack",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "backgroundColor": "#0F172A",
+      "resizeMode": "contain"
+    },
+    "assetBundlePatterns": [
+      "**/*",
+      "CSV files/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.financetracker.app",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Unlock Finance Tracker with Face ID"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+"backgroundColor": "#10B981"
+      },
+      "package": "com.financetracker.app"
+    },
+    "plugins": [
+      "expo-sqlite",
+      "expo-file-system"
+    ]
+  }
+}
