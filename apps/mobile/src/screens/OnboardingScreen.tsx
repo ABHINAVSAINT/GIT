@@ -145,7 +145,7 @@ function uuid(): string {
   });
 }
 
-type FlowKey = ACCOUNT_FLOW[number]['key'];
+type FlowKey = (typeof ACCOUNT_FLOW)[number]['key'];
 type OnboardingStep =
   | 'welcome'
   | `ask_${FlowKey}`
@@ -163,12 +163,12 @@ export function OnboardingScreen() {
     name: '',
     type: 'savings' as AccountType,
     balance: '',
-    color: ACCOUNT_COLORS[0],
+    color: ACCOUNT_COLORS[0] ?? '#0EA5E9',
     creditLimit: '',
     institution: '',
     investmentMode: 'sip' as 'sip' | 'onetime',
-    location: CASH_LOCATIONS[0],
-    subType: OTHER_SUBTYPES[0],
+    location: CASH_LOCATIONS[0] ?? 'Home',
+    subType: OTHER_SUBTYPES[0] ?? 'Other',
     emiTenure: '',
     fdRate: '',
     fdMaturityDate: '',
@@ -183,29 +183,12 @@ export function OnboardingScreen() {
 
   const currentFlow = useMemo(() => ACCOUNT_FLOW[currentFlowIndex], [currentFlowIndex]);
 
-  const resetForm = useCallback(() => {
-    setAccountForm({
-      name: '',
-      type: ACCOUNT_FLOW[currentFlowIndex]?.type ?? 'savings',
-      balance: '',
-      color: ACCOUNT_COLORS[0],
-      creditLimit: '',
-      institution: '',
-      investmentMode: 'sip',
-      location: CASH_LOCATIONS[0],
-      subType: OTHER_SUBTYPES[0],
-      emiTenure: '',
-      fdRate: '',
-      fdMaturityDate: '',
-    });
-  }, [currentFlowIndex]);
-
   const handleNextFlowItem = useCallback(() => {
     if (currentFlowIndex < ACCOUNT_FLOW.length - 1) {
       const nextIndex = currentFlowIndex + 1;
       setCurrentFlowIndex(nextIndex);
       setAccountsAddedForCurrentType(0);
-      setCurrentStep(`ask_${ACCOUNT_FLOW[nextIndex].key}`);
+      setCurrentStep(`ask_${ACCOUNT_FLOW[nextIndex]?.key ?? 'savings'}`);
     } else {
       setCurrentStep('complete');
     }
@@ -221,8 +204,8 @@ export function OnboardingScreen() {
       creditLimit: '',
       institution: '',
       investmentMode: 'sip',
-      location: CASH_LOCATIONS[0],
-      subType: OTHER_SUBTYPES[0],
+      location: CASH_LOCATIONS[0] ?? 'Home',
+      subType: OTHER_SUBTYPES[0] ?? 'Other',
       emiTenure: '',
       fdRate: '',
       fdMaturityDate: '',
@@ -285,12 +268,12 @@ export function OnboardingScreen() {
       name: '',
       type: newAccount.type,
       balance: '',
-      color: ACCOUNT_COLORS[0],
+      color: ACCOUNT_COLORS[0] ?? '#0EA5E9',
       creditLimit: '',
       institution: '',
       investmentMode: 'sip',
-      location: CASH_LOCATIONS[0],
-      subType: OTHER_SUBTYPES[0],
+      location: CASH_LOCATIONS[0] ?? 'Home',
+      subType: OTHER_SUBTYPES[0] ?? 'Other',
       emiTenure: '',
       fdRate: '',
       fdMaturityDate: '',
@@ -620,7 +603,7 @@ export function OnboardingScreen() {
             </Text>
             <TouchableOpacity
               style={[styles.primaryButton, { backgroundColor: theme.colors.primary }]}
-              onPress={() => setCurrentStep(`ask_${ACCOUNT_FLOW[0].key}`)}
+              onPress={() => setCurrentStep(`ask_${ACCOUNT_FLOW[0]?.key ?? 'savings'}`)}
             >
               <Text style={styles.primaryButtonText}>Get Started</Text>
             </TouchableOpacity>

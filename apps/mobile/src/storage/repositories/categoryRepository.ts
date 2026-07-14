@@ -2,7 +2,7 @@ import { getDatabase } from '../database';
 import type { Category } from '@finance/engine';
 
 export async function getAllCategories(): Promise<Category[]> {
-  const db = getDatabase();
+  const db = await getDatabase();
   const rows = db.getAll<any>(
     'SELECT * FROM categories ORDER BY sort_order'
   );
@@ -10,7 +10,7 @@ export async function getAllCategories(): Promise<Category[]> {
 }
 
 export async function getCategoriesByType(type: string): Promise<Category[]> {
-  const db = getDatabase();
+  const db = await getDatabase();
   const rows = db.getAll<any>(
     'SELECT * FROM categories WHERE type = ? ORDER BY sort_order',
     [type]
@@ -19,7 +19,7 @@ export async function getCategoriesByType(type: string): Promise<Category[]> {
 }
 
 export async function insertCategory(cat: Category): Promise<void> {
-  const db = getDatabase();
+  const db = await getDatabase();
   db.execute(
     `INSERT INTO categories (id, name, parent_id, type, icon, color, is_system, sort_order, budget_amount, budget_period)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -43,6 +43,5 @@ function mapRow(row: any): Category {
     sortOrder: row.sort_order,
     budgetAmount: row.budget_amount ?? undefined,
     budgetPeriod: row.budget_period ?? undefined,
-    createdAt: row.created_at,
   };
 }

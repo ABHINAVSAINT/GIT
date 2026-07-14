@@ -1,18 +1,61 @@
-import { open, DB } from '@op-engineering/op-sqlite';
+import { open, DB as OpSqliteDB, Scalar } from '@op-engineering/op-sqlite';
+
+/**
+ * Thin synchronous wrapper around @op-engineering/op-sqlite's DB.
+ *
+ * op-sqlite's real API only exposes `executeSync`/`execute` (async) which
+ * return a `QueryResult` with a `.rows` array — there is no `getAll`,
+ * `getFirst`, or a callback-free `transaction`. The rest of this module
+ * (migrations, repositories, seed data) is written against a simpler
+ * synchronous shape, so we adapt the real driver to that shape here in one
+ * place rather than throughout every call site.
+ */
+export type DB = {
+  getAll: <T = Record<string, Scalar>>(query: string, params?: Scalar[]) => T[];
+  getFirst: <T = Record<string, Scalar>>(query: string, params?: Scalar[]) => T | undefined;
+  execute: (query: string, params?: Scalar[]) => void;
+  transaction: (fn: () => void) => void;
+};
+
+function wrapDb(raw: OpSqliteDB): DB {
+  return {
+    getAll<T>(query: string, params?: Scalar[]): T[] {
+      return (raw.executeSync(query, params).rows ?? []) as unknown as T[];
+    },
+    getFirst<T>(query: string, params?: Scalar[]): T | undefined {
+      const rows = raw.executeSync(query, params).rows;
+      return (rows?.[0] as unknown as T) ?? undefined;
+    },
+    execute(query: string, params?: Scalar[]): void {
+      raw.executeSync(query, params);
+    },
+    transaction(fn: () => void): void {
+      raw.executeSync('BEGIN IMMEDIATE;');
+      try {
+        fn();
+        raw.executeSync('COMMIT;');
+      } catch (error) {
+        raw.executeSync('ROLLBACK;');
+        throw error;
+      }
+    },
+  };
+}
 
 let db: DB | null = null;
 
 export async function getDatabase(): Promise<DB> {
   if (db) return db;
 
-  db = open({ name: 'finance.db' });
+  const raw = open({ name: 'finance.db' });
+  const wrapped = wrapDb(raw);
 
-  db.execute('PRAGMA journal_mode = WAL;');
-  db.execute('PRAGMA foreign_keys = ON;');
-  db.execute('PRAGMA busy_timeout = 5000;');
+  wrapped.execute('PRAGMA journal_mode = WAL;');
+  wrapped.execute('PRAGMA foreign_keys = ON;');
+  wrapped.execute('PRAGMA busy_timeout = 5000;');
 
   try {
-    const integrity = db.getFirst<{ integrity_check: string }>(
+    const integrity = wrapped.getFirst<{ integrity_check: string }>(
       'PRAGMA quick_check;'
     );
     if (integrity && integrity.integrity_check !== 'ok') {
@@ -22,7 +65,8 @@ export async function getDatabase(): Promise<DB> {
     // integrity check not supported or failed; continue anyway
   }
 
-  await runMigrations(db);
+  await runMigrations(wrapped);
+  db = wrapped;
   return db;
 }
 

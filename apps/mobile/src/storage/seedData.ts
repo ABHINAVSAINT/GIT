@@ -12,16 +12,13 @@ function uuid(): string {
 }
 
 export async function seedData(): Promise<void> {
-  const db = getDatabase();
+  const db = await getDatabase();
   const existing = db.getFirst<{ count: number }>(
     'SELECT COUNT(*) as count FROM accounts'
   );
   if (existing && existing.count > 0) return;
 
   const now = new Date();
-  const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const lastMonthStr = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
 
   // ── Categories ──
   const categories: Category[] = [
@@ -73,7 +70,8 @@ export async function seedData(): Promise<void> {
     const foodAmounts = [45000, 32000, 28000, 55000, 38000, 62000, 41000];
     for (let i = 0; i < foodAmounts.length; i++) {
       const day = String(Math.min(10 + i * 3, 28)).padStart(2, '0');
-      transactions.push({ accountId: 'acc-credit', amount: foodAmounts[i], currency: 'INR', type: 'expense', date: `${prefix}-${day}`, categoryId: 'cat-food', merchant: 'Zomato/Swiggy', description: 'Food delivery', status: 'cleared', isRecurring: false, isTaxRelevant: false, tags: [], createdAt: now.toISOString(), updatedAt: now.toISOString(), version: 1 });
+      const foodAmount = foodAmounts[i] ?? 40000;
+      transactions.push({ accountId: 'acc-credit', amount: foodAmount, currency: 'INR', type: 'expense', date: `${prefix}-${day}`, categoryId: 'cat-food', merchant: 'Zomato/Swiggy', description: 'Food delivery', status: 'cleared', isRecurring: false, isTaxRelevant: false, tags: [], createdAt: now.toISOString(), updatedAt: now.toISOString(), version: 1 });
     }
 
     // Bills

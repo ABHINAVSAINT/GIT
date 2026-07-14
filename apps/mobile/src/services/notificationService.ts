@@ -88,7 +88,7 @@ export async function scheduleFDMaturityReminder(
     });
 
     // Store reminder in database
-    const db = getDatabase();
+    const db = await getDatabase();
     db.execute(
       `INSERT OR REPLACE INTO app_settings (key, value, updated_at) VALUES (?, ?, datetime('now'))`,
       [`reminder_fd_${accountId}`, JSON.stringify({ id, maturityDate, amount })]
@@ -142,7 +142,7 @@ export async function scheduleEMIPaymentReminder(
     });
 
     // Store reminder in database
-    const db = getDatabase();
+    const db = await getDatabase();
     db.execute(
       `INSERT OR REPLACE INTO app_settings (key, value, updated_at) VALUES (?, ?, datetime('now'))`,
       [`reminder_emi_${accountId}`, JSON.stringify({ id, dueDay, emiAmount })]
@@ -157,7 +157,7 @@ export async function scheduleEMIPaymentReminder(
 
 export async function cancelReminder(accountId: string, type: 'fd' | 'emi'): Promise<void> {
   try {
-    const db = getDatabase();
+    const db = await getDatabase();
     const key = `reminder_${type}_${accountId}`;
     const row = db.getFirst<{ value: string }>(
       `SELECT value FROM app_settings WHERE key = ?`,
@@ -179,7 +179,7 @@ export async function cancelReminder(accountId: string, type: 'fd' | 'emi'): Pro
 export async function cancelAllReminders(): Promise<void> {
   try {
     PushNotification.cancelAllLocalNotifications();
-    const db = getDatabase();
+    const db = await getDatabase();
     db.execute(`DELETE FROM app_settings WHERE key LIKE 'reminder_%'`);
   } catch (error) {
     console.error('Failed to cancel all reminders:', error);

@@ -10,7 +10,7 @@ import { useTheme } from '../design-system/theme/ThemeProvider';
 import { useFinanceStore } from '../store/financeStore';
 import { getAllAccounts, updateAccountBalances } from '../storage/repositories/accountRepository';
 import { getAllCategories } from '../storage/repositories/categoryRepository';
-import { insertTransaction, insertTransactionAndBalance, insertLinkedTransactions } from '../storage/repositories/transactionRepository';
+import { insertTransactionAndBalance, insertLinkedTransactions } from '../storage/repositories/transactionRepository';
 import {
   getTransactionTypesForAccount,
   computeBalanceDelta,
@@ -88,7 +88,7 @@ export function AddTransactionScreen() {
   const [selectedAccountId, setSelectedAccountId] = useState('');
   const [txType, setTxType] = useState<TransactionType>('expense');
   const [amount, setAmount] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [description, setDescription] = useState('');
   const [merchant, setMerchant] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
@@ -107,9 +107,9 @@ export function AddTransactionScreen() {
       const [accts, cats] = await Promise.all([getAllAccounts(), getAllCategories()]);
       setAccounts(accts);
       setCategories(cats);
-      if (accts.length > 0) setSelectedAccountId(accts[0].id);
+      if (accts[0]) setSelectedAccountId(accts[0].id);
       const expenseCats = cats.filter(c => c.type === 'expense');
-      if (expenseCats.length > 0) setSelectedCategoryId(expenseCats[0].id);
+      if (expenseCats[0]) setSelectedCategoryId(expenseCats[0].id);
     })();
   }, []);
 
@@ -124,7 +124,7 @@ export function AddTransactionScreen() {
   );
 
   useEffect(() => {
-    if (typeOptions.length > 0) {
+    if (typeOptions[0]) {
       const valid = typeOptions.find(t => t.type === txType);
       if (!valid) {
         setTxType(typeOptions[0].type);
@@ -161,7 +161,7 @@ export function AddTransactionScreen() {
     setTxType(newType);
     const catType = getCategoryFilterType(newType);
     const cats = categories.filter(c => c.type === catType);
-    if (cats.length > 0) setSelectedCategoryId(cats[0].id);
+    if (cats[0]) setSelectedCategoryId(cats[0].id);
     else setSelectedCategoryId('');
     setCounterpartAccountId('');
     setUnits('');
@@ -244,7 +244,6 @@ export function AddTransactionScreen() {
     const amountNum = parseFloat(amount);
     const amountPaise = Math.round(amountNum * 100);
     const now = new Date().toISOString();
-    const catType = getCategoryFilterType(txType);
 
     setSaving(true);
     try {
@@ -491,9 +490,9 @@ export function AddTransactionScreen() {
         <Text style={[styles.label, { color: theme.colors.textSecondary, marginTop: 16 }]}>Date</Text>
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
           {[
-            { label: 'Today', value: new Date().toISOString().split('T')[0] },
-            { label: 'Yesterday', value: new Date(Date.now() - 86400000).toISOString().split('T')[0] },
-            { label: '2 days ago', value: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0] },
+            { label: 'Today', value: new Date().toISOString().slice(0, 10) },
+            { label: 'Yesterday', value: new Date(Date.now() - 86400000).toISOString().slice(0, 10) },
+            { label: '2 days ago', value: new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10) },
           ].map(opt => (
             <Pressable
               key={opt.value}

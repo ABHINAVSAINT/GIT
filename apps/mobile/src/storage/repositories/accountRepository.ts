@@ -2,7 +2,7 @@ import { getDatabase } from '../database';
 import type { Account } from '@finance/engine';
 
 export async function getAllAccounts(): Promise<Account[]> {
-  const db = getDatabase();
+  const db = await getDatabase();
   const rows = db.getAll<any>(
     'SELECT * FROM accounts WHERE is_archived = 0 ORDER BY sort_order'
   );
@@ -10,7 +10,7 @@ export async function getAllAccounts(): Promise<Account[]> {
 }
 
 export async function getAccountById(id: string): Promise<Account | null> {
-  const db = getDatabase();
+  const db = await getDatabase();
   const row = db.getFirst<any>(
     'SELECT * FROM accounts WHERE id = ?', [id]
   );
@@ -18,7 +18,7 @@ export async function getAccountById(id: string): Promise<Account | null> {
 }
 
 export async function insertAccount(account: Account): Promise<void> {
-  const db = getDatabase();
+  const db = await getDatabase();
   db.execute(
     `INSERT INTO accounts (id, name, type, institution, currency, balance, balance_as_of,
       credit_limit, statement_day, due_day, apr, color, icon, is_hidden, is_archived, sort_order,
@@ -40,17 +40,21 @@ export async function insertAccount(account: Account): Promise<void> {
   );
 }
 
+function todayDateString(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export async function updateAccountBalance(accountId: string, deltaPaise: number): Promise<void> {
-  const db = getDatabase();
+  const db = await getDatabase();
   db.execute(
     `UPDATE accounts SET balance = balance + ?, balance_as_of = ? WHERE id = ?`,
-    [deltaPaise, new Date().toISOString().split('T')[0], accountId]
+    [deltaPaise, todayDateString(), accountId]
   );
 }
 
 export async function updateAccountBalances(deltas: { accountId: string; delta: number }[]): Promise<void> {
-  const db = getDatabase();
-  const today = new Date().toISOString().split('T')[0];
+  const db = await getDatabase();
+  const today = todayDateString();
   db.transaction(() => {
     for (const { accountId, delta } of deltas) {
       db.execute(
@@ -62,7 +66,7 @@ export async function updateAccountBalances(deltas: { accountId: string; delta: 
 }
 
 export async function getAccountsByType(type: string): Promise<Account[]> {
-  const db = getDatabase();
+  const db = await getDatabase();
   const rows = db.getAll<any>(
     'SELECT * FROM accounts WHERE type = ? AND is_archived = 0 ORDER BY sort_order',
     [type]

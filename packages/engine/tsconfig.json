@@ -5,7 +5,8 @@
     "rootDir": "./src",
     "lib": ["ES2022"],
     "noEmit": false,
-    "declaration": true
+    "declaration": true,
+    "composite": true
   },
   "include": ["src"],
   "exclude": ["src/__tests__"]

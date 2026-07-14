@@ -40,10 +40,6 @@ export function TrendChart({ data, title, color, height = 200 }: TrendChartProps
   }
 
   const values = data.map(d => d.value);
-  const maxVal = Math.max(...values);
-  const minVal = Math.min(...values);
-  const range = maxVal - minVal || 1;
-
   const maxValue = Math.max(...values);
   const minValue = Math.min(...values);
   const valueRange = maxValue - minValue || 1;
@@ -89,26 +85,33 @@ export function TrendChart({ data, title, color, height = 200 }: TrendChartProps
       </View>
 
       {/* Summary */}
-      <View style={styles.summary}>
-        <View style={styles.summaryItem}>
-          <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Latest</Text>
-          <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
-            {formatINR(data[data.length - 1].value)}
-          </Text>
-        </View>
-        {data.length >= 2 && (
-          <View style={styles.summaryItem}>
-            <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Change</Text>
-            <Text style={[
-              styles.summaryValue,
-              { color: data[data.length - 1].value >= data[0].value ? theme.colors.success : theme.colors.danger }
-            ]}>
-              {data[data.length - 1].value >= data[0].value ? '+' : ''}
-              {formatINR(data[data.length - 1].value - data[0].value)}
-            </Text>
+      {(() => {
+        const latest = data[data.length - 1];
+        const first = data[0];
+        if (!latest || !first) return null;
+        return (
+          <View style={styles.summary}>
+            <View style={styles.summaryItem}>
+              <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Latest</Text>
+              <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
+                {formatINR(latest.value)}
+              </Text>
+            </View>
+            {data.length >= 2 && (
+              <View style={styles.summaryItem}>
+                <Text style={[styles.summaryLabel, { color: theme.colors.textSecondary }]}>Change</Text>
+                <Text style={[
+                  styles.summaryValue,
+                  { color: latest.value >= first.value ? theme.colors.success : theme.colors.danger }
+                ]}>
+                  {latest.value >= first.value ? '+' : ''}
+                  {formatINR(latest.value - first.value)}
+                </Text>
+              </View>
+            )}
           </View>
-        )}
-      </View>
+        );
+      })()}
     </View>
   );
 }

@@ -5,8 +5,8 @@ import { useTheme } from '../design-system/theme/ThemeProvider';
 import { useFinanceStore } from '../store/financeStore';
 import { getAllTransactions } from '../storage/repositories/transactionRepository';
 import { getAllCategories } from '../storage/repositories/categoryRepository';
-import { generateInsights, computePortfolioMetrics } from '@finance/engine';
-import type { Transaction, Category, Insight } from '@finance/engine';
+import { generateInsights } from '@finance/engine';
+import type { Insight } from '@finance/engine';
 
 export function InsightsScreen() {
   const theme = useTheme();
@@ -77,11 +77,6 @@ export function InsightsScreen() {
     setRefreshing(false);
   }
 
-  function formatINR(paise: number): string {
-    const rupees = Math.abs(paise) / 100;
-    return `₹${rupees.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-  }
-
   function getInsightIcon(type: string): string {
     const icons: Record<string, string> = {
       spending_anomaly: '⚠️',
@@ -96,12 +91,6 @@ export function InsightsScreen() {
       tax_optimization: '📋',
     };
     return icons[type] ?? '💡';
-  }
-
-  function getInsightColor(type: string, colors: any): string {
-    if (['low_balance', 'budget_breach', 'spending_anomaly'].includes(type)) return colors.warning;
-    if (['savings_opportunity', 'goal_progress'].includes(type)) return colors.success;
-    return colors.info;
   }
 
   return (

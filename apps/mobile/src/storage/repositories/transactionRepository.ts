@@ -2,7 +2,7 @@ import { getDatabase } from '../database';
 import type { Transaction } from '@finance/engine';
 
 export async function getAllTransactions(limit = 100): Promise<Transaction[]> {
-  const db = getDatabase();
+  const db = await getDatabase();
   const rows = db.getAll<any>(
     `SELECT * FROM transactions WHERE is_deleted = 0 ORDER BY date DESC LIMIT ?`,
     [limit]
@@ -11,7 +11,7 @@ export async function getAllTransactions(limit = 100): Promise<Transaction[]> {
 }
 
 export async function getTransactionsByAccount(accountId: string): Promise<Transaction[]> {
-  const db = getDatabase();
+  const db = await getDatabase();
   const rows = db.getAll<any>(
     `SELECT * FROM transactions WHERE account_id = ? AND is_deleted = 0 ORDER BY date DESC`,
     [accountId]
@@ -20,7 +20,7 @@ export async function getTransactionsByAccount(accountId: string): Promise<Trans
 }
 
 export async function getTransactionsByDateRange(startDate: string, endDate: string): Promise<Transaction[]> {
-  const db = getDatabase();
+  const db = await getDatabase();
   const rows = db.getAll<any>(
     `SELECT * FROM transactions WHERE date >= ? AND date <= ? AND is_deleted = 0 ORDER BY date DESC`,
     [startDate, endDate]
@@ -29,7 +29,7 @@ export async function getTransactionsByDateRange(startDate: string, endDate: str
 }
 
 export async function insertTransaction(tx: Transaction): Promise<void> {
-  const db = getDatabase();
+  const db = await getDatabase();
   db.execute(
     `INSERT INTO transactions (id, account_id, counterpart_account_id, amount, currency, type, date,
       posted_date, category_id, subcategory_id, tags, merchant, description, notes,
@@ -58,8 +58,8 @@ export async function insertTransactionAndBalance(
   tx: Transaction,
   deltaPaise: number
 ): Promise<void> {
-  const db = getDatabase();
-  const today = new Date().toISOString().split('T')[0];
+  const db = await getDatabase();
+  const today = new Date().toISOString().slice(0, 10);
   db.transaction(() => {
     insertTransactionRaw(db, tx);
     if (deltaPaise !== 0) {
@@ -72,7 +72,7 @@ export async function insertTransactionAndBalance(
 }
 
 export async function insertLinkedTransactions(primary: Transaction, counterpart: Transaction): Promise<void> {
-  const db = getDatabase();
+  const db = await getDatabase();
   db.transaction(() => {
     insertTransactionRaw(db, primary);
     insertTransactionRaw(db, counterpart);
@@ -105,7 +105,7 @@ function insertTransactionRaw(db: any, tx: Transaction): void {
 }
 
 export async function deleteTransaction(id: string): Promise<void> {
-  const db = getDatabase();
+  const db = await getDatabase();
   db.execute(
     `UPDATE transactions SET is_deleted = 1, deleted_at = datetime('now') WHERE id = ?`,
     [id]
@@ -113,7 +113,7 @@ export async function deleteTransaction(id: string): Promise<void> {
 }
 
 export async function getMonthlyCashflow(year: number, month: number): Promise<{ income: number; expenses: number; netSavings: number }> {
-  const db = getDatabase();
+  const db = await getDatabase();
   const monthStr = String(month).padStart(2, '0');
   const datePrefix = `${year}-${monthStr}`;
 

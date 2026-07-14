@@ -103,7 +103,7 @@ export function TransactionsScreen() {
     const [y, m] = key.split('-');
     const months = ['January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'];
-    return `${months[parseInt(m) - 1]} ${y}`;
+    return `${months[parseInt(m ?? '1') - 1]} ${y}`;
   }
 
   function getTxnSign(t: Transaction): boolean {
@@ -150,7 +150,7 @@ export function TransactionsScreen() {
           </View>
         }
         renderItem={({ item: monthKey }) => {
-          const monthTxns = grouped[monthKey];
+          const monthTxns = grouped[monthKey] ?? [];
           const monthIncome = monthTxns.filter(t => isIncomeType(t.type)).reduce((s, t) => s + t.amount, 0);
           const monthExpense = monthTxns.filter(t => isExpenseType(t.type)).reduce((s, t) => s + Math.abs(t.amount), 0);
 

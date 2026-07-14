@@ -37,12 +37,11 @@ export function PortfolioSummary({ investments }: PortfolioSummaryProps) {
   // Group by type
   const byType: Record<string, { invested: number; current: number; count: number }> = {};
   for (const inv of investments) {
-    if (!byType[inv.type]) {
-      byType[inv.type] = { invested: 0, current: 0, count: 0 };
-    }
-    byType[inv.type].invested += inv.investedAmount;
-    byType[inv.type].current += inv.currentValue;
-    byType[inv.type].count += 1;
+    const entry = byType[inv.type] ?? { invested: 0, current: 0, count: 0 };
+    entry.invested += inv.investedAmount;
+    entry.current += inv.currentValue;
+    entry.count += 1;
+    byType[inv.type] = entry;
   }
 
   return (

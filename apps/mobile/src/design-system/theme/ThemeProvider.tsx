@@ -61,7 +61,8 @@ interface Props {
 
 export function ThemeProvider({ children }: Props) {
   const systemScheme = useColorScheme();
-  const [userDark, setUserDark] = useState<boolean | null>(null);
+  // Reserved for a future manual dark-mode override setting.
+  const [userDark] = useState<boolean | null>(null);
   const dark = userDark ?? systemScheme === 'dark';
   const theme = useMemo(() => buildTheme(dark), [dark]);
 

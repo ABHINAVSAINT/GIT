@@ -47,7 +47,7 @@ export async function createSingleTransaction(
   tx: Transaction,
   deltaPaise: number
 ): Promise<void> {
-  const db = getDatabase();
+  const db = await getDatabase();
   db.transaction(() => {
     insertTransactionRaw(db, tx);
     if (deltaPaise !== 0) {
@@ -66,7 +66,7 @@ export async function createLinkedTransfer(
   primaryDelta: number,
   counterpartDelta: number
 ): Promise<void> {
-  const db = getDatabase();
+  const db = await getDatabase();
   db.transaction(() => {
     insertTransactionRaw(db, primary);
     insertTransactionRaw(db, counterpart);
@@ -84,7 +84,7 @@ export async function createInvestmentPurchase(
   units: number,
   nav: number
 ): Promise<void> {
-  const db = getDatabase();
+  const db = await getDatabase();
   db.transaction(() => {
     insertTransactionRaw(db, tx);
     updateBalanceRaw(db, tx.accountId, -tx.amount);
@@ -104,7 +104,7 @@ export async function createInvestmentRedemption(
   units: number,
   _nav: number
 ): Promise<void> {
-  const db = getDatabase();
+  const db = await getDatabase();
   db.transaction(() => {
     insertTransactionRaw(db, tx);
     updateBalanceRaw(db, tx.accountId, tx.amount);

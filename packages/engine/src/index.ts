@@ -14,4 +14,25 @@ export {
   isTransferType,
   isInvestmentType,
 } from './types';
-export type { TransactionTypeOption } from './types';
+export type {
+  TransactionTypeOption,
+  AccountType,
+  Account,
+  TransactionType,
+  TransactionStatus,
+  Transaction,
+  InvestmentType,
+  Investment,
+  Cashflow,
+  PortfolioMetrics,
+  Insight,
+  InsightType,
+  Goal,
+  GoalType,
+  GoalStatus,
+  Loan,
+  LoanType,
+  Category,
+  RecurringRule,
+  AmortizationRow,
+} from './types';

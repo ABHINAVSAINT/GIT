@@ -1,4 +1,3 @@
-import { Transaction, calculateCashback } from '@finance/engine';
 import { insertTransaction } from '../storage/repositories/transactionRepository';
 import { getAllCategories } from '../storage/repositories/categoryRepository';
 import { updateAccountBalance } from '../storage/repositories/accountRepository';
@@ -29,9 +28,11 @@ function parseDate(dateStr: string): string | null {
   if (!dateStr || dateStr.trim() === '') return null;
   const parts = dateStr.trim().split(/[\s-]+/);
   if (parts.length !== 3) return null;
-  const day = parts[0].padStart(2, '0');
-  const month = MONTH_MAP[parts[1]];
-  const year = parts[2].length === 2 ? `20${parts[2]}` : parts[2];
+  const [rawDay, rawMonth, rawYear] = parts;
+  if (!rawDay || !rawMonth || !rawYear) return null;
+  const day = rawDay.padStart(2, '0');
+  const month = MONTH_MAP[rawMonth];
+  const year = rawYear.length === 2 ? `20${rawYear}` : rawYear;
   if (!month) return null;
   return `${year}-${month}-${day}`;
 }
@@ -68,11 +69,11 @@ function generateId(): string {
   });
 }
 
-function findCategoryId(categories: any[], type: 'income' | 'expense' | 'transfer', fallbackName: string): string {
+function findCategoryId(categories: any[], type: 'income' | 'expense' | 'transfer' | 'investment', _fallbackName?: string): string {
   const systemCats = categories.filter(c => c.isSystem && c.type === type);
-  if (systemCats.length > 0) return systemCats[0].id;
+  if (systemCats[0]) return systemCats[0].id;
   const allCats = categories.filter(c => c.type === type);
-  if (allCats.length > 0) return allCats[0].id;
+  if (allCats[0]) return allCats[0].id;
   return generateId();
 }
 
@@ -80,11 +81,11 @@ function parseCSV(text: string): { headers: string[]; rows: string[][] } {
   const lines = text.trim().split('\n');
   if (lines.length < 2) return { headers: [], rows: [] };
   
-  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+  const headers = (lines[0] ?? '').split(',').map(h => h.trim().replace(/"/g, ''));
   const rows: string[][] = [];
   
   for (let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim();
+    const line = (lines[i] ?? '').trim();
     if (!line) continue;
     const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
     if (values.length >= headers.length) {
@@ -490,11 +491,11 @@ const ACCOUNT_CSV_MAP: Record<string, { csv: string; importer: ImporterType }[]>
 };
 
 const CSV_KEYWORDS: { keywords: string[]; csvs: { csv: string; importer: ImporterType }[] }[] = [
-  { keywords: ['slice', 'saving'], csvs: ACCOUNT_CSV_MAP['Slice Saving Account'] },
-  { keywords: ['kotak', 'saving'], csvs: ACCOUNT_CSV_MAP['Kotak Mahindra Saving Account'] },
-  { keywords: ['axis', 'credit', 'cc'], csvs: ACCOUNT_CSV_MAP['Axis Credit Card'] },
-  { keywords: ['slice', 'credit', 'cc'], csvs: ACCOUNT_CSV_MAP['Slice Credit Card'] },
-  { keywords: ['bajaj', 'emi'], csvs: ACCOUNT_CSV_MAP['Bajaj Finserv EMI Card'] },
+  { keywords: ['slice', 'saving'], csvs: ACCOUNT_CSV_MAP['Slice Saving Account']! },
+  { keywords: ['kotak', 'saving'], csvs: ACCOUNT_CSV_MAP['Kotak Mahindra Saving Account']! },
+  { keywords: ['axis', 'credit', 'cc'], csvs: ACCOUNT_CSV_MAP['Axis Credit Card']! },
+  { keywords: ['slice', 'credit', 'cc'], csvs: ACCOUNT_CSV_MAP['Slice Credit Card']! },
+  { keywords: ['bajaj', 'emi'], csvs: ACCOUNT_CSV_MAP['Bajaj Finserv EMI Card']! },
   { keywords: ['emi', 'card'], csvs: [{ csv: '', importer: 'emi_card' }] },
   { keywords: ['fd', 'fixed', 'deposit'], csvs: [{ csv: '', importer: 'fd' }] },
   { keywords: ['investment', 'mutual', 'fund', 'sip'], csvs: [{ csv: '', importer: 'investment' }] },

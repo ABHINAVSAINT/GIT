@@ -10,7 +10,6 @@ export default function App() {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const loadSettings = useSettingsStore((s) => s.load);
-  const onboardingComplete = useSettingsStore((s) => s.onboardingComplete);
 
   useEffect(() => {
     init();
